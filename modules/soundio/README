@@ -1,0 +1,19 @@
+soundio README
+==============
+
+soundio is a C++ module for audio I/O.
+
+The module provides 4 main classes for an application to instantiate:
+* SoundReader - for reading audio from a file
+* SoundWriter - for writing audio to a file
+* SoundRecorder - for capturing live audio
+* SoundPlayer - for playing audio
+
+In the interest of flexibility, testability and reuse it uses two common interfaces:
+* SoundSource - a common interface for file read (SoundReader) and live line in (SoundRecorder)
+* SoundSink - a common interface for file write (SoundWriter) and live line out (SoundPlayer)
+
+The module can work against the following lower level libraries:
+* portaudio
+* libsndfile
+* mpg123 - used when HAVE_MPG123 is defined

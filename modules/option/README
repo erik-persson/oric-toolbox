@@ -1,0 +1,14 @@
+option README
+=============
+
+option is a convenience C++ layer on top of getopt_long.
+
+It allows command line options to be declared anywhere in a program,
+but makes the options visible to the program's main function.
+This can be convenient when temporary options are needed during development.
+
+The following global functions are for use by a main function:
+* Option::Parse to parse the commandline, and
+* Option::Help to print the help text.
+
+See header file Option.h for more details.

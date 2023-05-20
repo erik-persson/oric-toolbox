@@ -1,0 +1,148 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+#
+#  Configure script
+#
+#  Copyright (c) 2022 Erik Persson
+#
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# Help
+#------------------------------------------------------------------------------
+
+function show_help() {
+    cat <<!
+Usage: ./configure [options]
+Options are :
+  -h / --help        Print this help message
+!
+}
+
+#------------------------------------------------------------------------------
+# Helper function
+#------------------------------------------------------------------------------
+
+function check_status() {
+if [ $1 -eq 0 ]; then
+    echo yes
+else
+    echo no
+    echo Configuration failed
+    exit 1
+fi
+}
+
+#------------------------------------------------------------------------------
+# Checks for gcc
+#------------------------------------------------------------------------------
+
+function check_gcc() {
+
+    printf "Checking if gcc exists... "
+    gcc -v 2>/dev/null
+    check_status $?
+
+    #--------
+
+    printf "Checking if gcc seems to work... "
+
+cat <<! | g++ -x c++ 2>/dev/null -
+#include <stdio.h>
+int main(void)
+{
+    return 0;
+}
+!
+    check_status $?
+
+    #--------
+
+    printf "Checking if gcc is C++17 capable... "
+
+cat <<! | g++ -x c++ -std=c++17 2>/dev/null -
+#include <stdio.h>
+int main(void)
+{
+    return 0;
+}
+!
+    check_status $?
+}
+
+#------------------------------------------------------------------------------
+# Check for make
+#------------------------------------------------------------------------------
+
+function check_make() {
+    printf "Checking if make exists... "
+    make -v >/dev/null
+    check_status $?
+}
+
+#------------------------------------------------------------------------------
+# Check for autogen
+#------------------------------------------------------------------------------
+
+function check_autogen() {
+    printf "Checking if autogen exists... "
+    autogen -v >/dev/null
+    check_status $?
+}
+
+#------------------------------------------------------------------------------
+# Check for autoconf
+#------------------------------------------------------------------------------
+
+function check_autoconf() {
+    printf "Checking if autoconf exists... "
+    autoconf -V >/dev/null
+    check_status $?
+}
+
+#------------------------------------------------------------------------------
+# Check for automake
+#------------------------------------------------------------------------------
+
+function check_automake() {
+    printf "Checking if automake exists... "
+    automake --version >/dev/null
+    check_status $?
+}
+
+#------------------------------------------------------------------------------
+# Command line parsing
+#------------------------------------------------------------------------------
+
+for opt do
+    case "$opt" in
+
+        --help|-h)
+            show_help
+            exit 0
+        ;;
+
+        *)
+            echo "$0: invalid option $opt" >&2
+            show_help
+            exit 1
+        ;;
+
+    esac
+done
+
+#------------------------------------------------------------------------------
+# Main script
+#------------------------------------------------------------------------------
+
+check_gcc
+check_make
+check_autogen
+check_autoconf
+check_automake
+
+# Remove previous configuration in subprojects
+make clean-config
+
+# Run configure in subprojects
+make config

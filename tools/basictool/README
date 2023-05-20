@@ -1,0 +1,17 @@
+basictool - A tool for managing Oric BASIC files
+================================================
+
+Features
+--------
+* Read tape archive file
+* Write out BASIC files as text
+* Write out non BASIC files in hexadecimal
+* Write out trailing bytes after BASIC in hexadecimal
+
+Wishlist
+--------
+* Backwards mode (text-to-basic)
+
+Bugs
+----
+* If you pass a directory instead of a file to basictool, it doesn't print any error

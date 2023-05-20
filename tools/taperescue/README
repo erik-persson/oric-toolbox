@@ -1,0 +1,231 @@
+taperescue - A tool for managing Oric tapes
+===========================================
+
+taperescue is a command line tool for processing tape recordings of the format
+used by the classic Oric-1 and Oric Atmos microcomputers.
+
+It is a multi-functinal tool, a bit like like UNIX tar, but also with live
+audio I/O support so it can communicate directly with a cassette tape recorder
+connected to the host computer's audio ports.
+
+A key goal is to be able to recover the weakest tape recordings, that may
+have deteriorated over the years, saving creative works from being lost
+forever. Modern signal processing filters combined with statistical methods
+such as Markov models and Viterbi decoding shall be used to get the most out
+of the signal, in order to recover the Oric material with a minimum of errors.
+
+Features
+========
+
+* Reading and writing .wav audio files
+* Reading and writing .tap archive files
+* Recording audio file from line in or microphone
+* Re-playing tape archive or audio file to speaker or line out
+* Decoding audio file to tape archive.
+* Support for both the slow and fast Oric formats.
+* Listing contents of audio file or tape archive file
+* Extracting files from audio file tape archive file
+* Encoding tape archive into audio file form
+
+Flow chart
+==========
+
+                     .-----------.    .-----------.
+    .-----------.    |           |--->| .wav file |  --record
+    | live audio|--->|  Recorder |    '-----------'
+    '-----------'    |           |--.
+                     '-----------'  | Not implemented
+                 .------------------'
+                 |   .-----------.    .-----------.
+                 '-->|           |--->|.tap file  |  --decode
+    .-----------.    |  Decoder  |    '-----------'
+    | .wav file |--->|           |--.
+    '-----------'    '-----------'  |
+                 .------------------'
+                 |   .-----------.    .-----------.
+                 '-->|           |--->| Listing   |  --list
+                     |           |    '-----------'
+    .-----------.    |  Archive  |    .-----------.
+    |.tap files |--->| operations|--->|.tap files |  --extract
+    '-----------'    |           |    '-----------'
+                     |           |--.
+                     '-----------'  | Not implemented
+                 .------------------'
+                 |   .-----------.    .-----------.
+                 '-->|           |--->| .wav file |  --encode
+    .-----------.    |  Encoder  |    '-----------'
+    |.tap files |--->|           |--.
+    '-----------'    '-----------'  |
+                 .------------------'
+                 |   .-----------.
+                 '-->|           |    .-----------.
+    .-----------.    |  Player   |--->| live audio|  --play
+    | .wav file |--->|           |    '-----------'
+    '-----------'    '-----------'
+
+Command explanations
+====================
+
+taperescue must be invoked with one of the following commands:
+
+Command       Arguments           Descrition
+------------  ------------------  --------------------------------------------
+-h/--help     -                   Show command line syntax
+
+-V/--version  -                   Print program version
+
+-l/--list     <in.tap/wav>        List contents of tape. For each file on tape
+                                  the location, byte length, flags, errors
+                                  and filename are printed. Flags are:
+                                      B   BASIC program
+                                      A   Autorun
+                                      S   Slow format
+
+-x/--extract  <in.tap/wav>        Extract individual files from tape
+
+-d/--decode   <in.wav> <out.tap>  Decode waveform into a tape archive
+
+-e/--encode   <in.tap> <out.wav>  Encode tape archive to a waveform
+
+-p/--play     <in.tap/wav>        Play archive/waveform to audio output device
+
+-r/--record   <out.wav>           Record waveform from audio input device
+
+
+Format selection
+================
+
+Both encoder and decoder use the same flags:
+
+Flag        Descrition
+----------  ---------------------------------------------------
+-f/--fast   Use fast format, like CLOAD/CSAVE without ,S option
+-s/--slow   Use slow format, like CLOAD/CSAVE with ,S option
+
+When no flag is set the encoder will use fast format, and the decoder
+will autodetect the format of the recording.
+
+Decoder engine selection
+========================
+
+There are three main decoding engines:
+
+* Demodulating decoder - this is the default engine for slow format.
+  It supports only slow format, like CLOAD with ,S option.
+  It runs fast and can handle weak recordings where the 2400 Hz band
+  is completely silent.
+  The engine operates by detecting oscillations in the 1200 Hz and 2400 Hz
+  bands, summing the bands using weights that minimize noise.
+
+* Xenon decoder - this is the default engine for fast format.
+  It supports only fast format, like CLOAD without ,S option.
+  The engine relies on two cues to read bytes: correlation with a
+  wide peak shape to find the location of '0' bit symbols, and an area
+  measure over a pulse from trench to trench to distinguish '0' from '1'.
+  The combination of these two cues gives resilience against both tape
+  stretch and loss of high frequencies.
+
+* Two-stage dual mode decoder - alternative decoder that can be use
+  for both the fast and slow formats. This is slower and in general less
+  accurate than the other decoders. The engine operates by first
+  extracting physical bits, then decoding bytes from those bits.
+
+By default, taperescue runs the demodulating and the Xenon decoder
+in parallel, and autodetects the format. If slow or fast format is specified
+on the commandline, only one decoder is used.
+
+Options that control the engine selection are as follows.
+
+Flag        Descrition
+----------  ------------------------------------------------------------------
+--clock     Expected bit rate in Hz (default 4800).
+            The bit rate of actual recordings deviate from the nominal 4800 Hz
+            frequency due to variation in tape motor speed. The decoder will
+            attempt to adjust to such variations automatically, but will use
+            the this parameter as the center for its search.
+
+-2/--dual   Use two-stage dual format decoder.
+
+--low-band  Restrict the demodulating decoder to use only the 1200 Hz band
+            which is indicating '0' bits, disabling the 2400 Hz band.
+
+--high-band Restrict the demodulating decoder to use only the 2400 Hz band
+            which is indicating '1' bits, disabling the 1200 Hz band.
+
+--area-cue  Force Xenon decoder to use pulse area to distinguish bits.
+            In this mode the area for every potential physical bit is measured
+            and the are measure tells a '0' bit from a '1' bit. By default,
+            the Xenon decoder makes an automatic per-byte choice between
+            area and wide cues, this option limits it to using the area cue
+            only.
+
+--wide-cue  Force Xenon decoder to use wide pulse location to distinguish bits.
+            In this mode a '0' is recognized by detecting a wide pulse and '1'
+            bits are inferred from the distance between the '0' bits. By
+            default, the Xenon decoder makes an automatic per-byte choice
+            between area and wide cues, this option limits it to using the wide
+            cue only.
+
+--grid      Use bit extractor named Grid (default is Pattern). This affects
+            how the two-stage dual format decoder extracts physical bits.
+
+--super     Use bit extractor named Super (default is Pattern). This affects
+            how the two-stage dual format decoder extracts physical bits.
+
+--plen      Use alternative fast format decoder named PLEN. This affects how
+            the two-stage dual decodes bytes from physical bits.
+
+--barrel    Use alternative fast format decoder named Barrel. This affects how
+            the two-stage dual decodes bytes from physical bits.
+
+Other flags
+===========
+
+Flag             Argument   Descrition
+---------------  -------    --------------------------------------------------
+-S/--start       mm:ss.cc   Specify start time in minutes:seconds notation
+                            This causes decoding to start with a time offset
+                            into the tape recording
+
+-E/--end         mm:ss.cc   Specify end time in minutes:seconds notation
+                            This causes decoding to end at a certain time
+                            offset into the tape recording
+
+-O/--output-dir  dirname    Specify directory to extract files into.
+                            Directory will be created if it does not exist.
+                            For use with the --extract command
+
+-v/--verbose     -          Print diagnostic messages and tape contents in
+                            hexadecimal format
+
+-D/--dump        -          Write intermediate waveform(s) named
+                            dump-<xxx>.wav when decoding.
+
+Error detection
+===============
+
+The commands --list, --extract or --decode report errors when the program
+finds that a byte on tape look incorrect.
+
+Each byte in the Oric tape format has the following structure:
+* One start bit, valued 0.
+* Eight data bits.
+* One parity, which should contain the XOR of the data bits, negated.
+* At least two stop bits, nominally three, valued 1.
+
+A sync error is reported when the start or stop bits are incorrect.
+A parity error is reported when the parity bit doesn't match the value
+calculated from the 8 data bits. Parity errors are only reported for
+bytes that do not have sync errors.
+
+The --list command reports the sum of errors in each files.
+
+When the --verbose flag is added to a --list command, all tape contents are
+listed in the form of a hex dump, where bytes with errors are suffixed by an
+exclamation mark (!) for sync error, or a question mark (?) on parity error.
+
+Limitations
+===========
+
+* Files specific to the Oric Atmos STORE/RECALL commands are not supported
+* Only tape recordings captured at 44100 Hz have been tested

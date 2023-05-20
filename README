@@ -3,3 +3,57 @@ About oric-toolbox
 
 oric-toolbox is a set of command line tools for handling files for the
 classic Oric-1 and Oric Atmos microcomputers.
+
+The tools are:
+* taperescue - a tool for processing Oric tape recordings
+* basictool - a tool that can list BASIC programs in Oric format
+
+More information on the individual tools can be found in
+* tools/taperescue/README
+* tools/basictool/README
+
+Installation
+============
+
+To install the tools you need GNU make and a C++17 compiler.
+
+You will also need autoconf, autogen and automake.
+On macOS, you can run the following commands to install them:
+    brew install autoconf autogen automake
+
+After that, the command sequence
+    ./configure
+    make all
+    make install
+will compile the tools and install them in /usr/local/bin.
+
+You can skip the 'make install' step, a 'bin' directory will also be
+created in the current directory where you can find the binaries.
+
+To find out about supported configuration options, type
+    ./configure --help
+
+To install in a different location e.g /home/john/bin do like this:
+    make install PREFIX=/home/john
+
+Dependencies
+============
+
+oric-toolbox depends on
+* libsndfile (expected source code location: libs/libsndfile)
+* PortAudio (expected source code location: libs/portaudio)
+
+If not found in their expected location, the build system will attempt
+to download an appropriate version of the source code from github.
+
+Portability
+===========
+
+Platforms on which the software has run successfully include
+* openSUSE 15.3, x84_64
+* macOS Monterey 13.0, AArch64
+* cygwin on Windows 10, x86_64
+
+Compilers that have been used with success include
+* gcc 7.5.0
+* Apple clang version 12.0.5
