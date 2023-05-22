@@ -2,7 +2,7 @@
 //
 //  taperescue - A tool for managing Oric tapes
 // 
-//  Copyright (c) 2021-2022 Erik Persson
+//  Copyright (c) 2021-2023 Erik Persson
 //
 //----------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-#define VERSION "1.0"
+#define VERSION "1.0.2"
 
 //----------------------------------------------------------------------------
 // Command line options
@@ -209,7 +209,7 @@ static void adjust_file_name(char *adjusted_name, int bufsize,
     // append -<n> where n makes the file name unique.
     if (1)
     {
-        char try_name[34];
+        char try_name[44];
         assert(strlen(valid_name) < sizeof(try_name));
         strcpy(try_name, valid_name);
 
