@@ -28,7 +28,7 @@ ifndef CPPFLAGS
     CPPFLAGS := $(CFLAGS)
 endif
 
-SYS := $(shell gcc -dumpmachine)
+SYS := $(shell $(CC) -dumpmachine)
 
 ifneq (, $(findstring cygwin, $(SYS)))
   # In cygwin: allow extensions so we can use Posix functions
