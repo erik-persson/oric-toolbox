@@ -223,7 +223,7 @@ short *FileBackend::GetBlock(int block_no) const
     // In that case we read all the blocks from the beginning.
     (void) m_reader.SetReadPos( ((int64_t) block_no) * m_block_size * channels  );
     int64_t at_pos = m_reader.GetReadPos()/channels;
-    int at_block_no = at_pos/(m_block_size * channels);
+    int at_block_no = at_pos/m_block_size;
     assert(((int64_t) at_block_no) * m_block_size == at_pos);
 
     while (at_block_no <= block_no)
@@ -245,7 +245,7 @@ short *FileBackend::GetBlock(int block_no) const
         else
         {
             // Read first to stereo buffer, then convert to mono
-            ok = m_reader.Read(m_stereo_buf, size);
+            ok = m_reader.Read(m_stereo_buf, size*channels);
             if (ok)
                 average_channels(m_blocks[at_block_no], size, m_stereo_buf, channels);
         }
