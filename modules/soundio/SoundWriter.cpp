@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <atomic>
+#include <utility>
 
 //----------------------------------------------------------------------------
 // SoundWriterBackend

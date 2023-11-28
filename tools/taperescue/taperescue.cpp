@@ -202,7 +202,9 @@ static void adjust_file_name(char *adjusted_name, int bufsize,
     else
     {
         int sec0 = (int) floor(file.start_time);
-        sprintf(valid_name, "FILE_AT_%02d_%02d", sec0/60, sec0%60);
+        int len = snprintf(valid_name, sizeof(valid_name),
+                 "FILE_AT_%02d_%02d", sec0/60, sec0%60);
+        assert(len < (int) sizeof(valid_name));
     }
 
     // If the same file name occurs multiple times,
@@ -217,8 +219,9 @@ static void adjust_file_name(char *adjusted_name, int bufsize,
         while (used_names->find(try_name) != used_names->end())
         {
             unique_no++;
-            assert(strlen(valid_name) + 10 < sizeof(try_name));
-            sprintf(try_name, "%s-%d", valid_name, unique_no);
+            int len = snprintf(try_name, sizeof(try_name),
+                "%s-%d", valid_name, unique_no);
+            assert(len < (int) sizeof(try_name));
         }
         assert((int) strlen(try_name) < bufsize);
         strcpy(adjusted_name, try_name);
@@ -429,8 +432,6 @@ static int extract(DecoderOptions& options)
     if (g_output_dir && !prepare_dest_dir(g_output_dir, g_verbose))
         exit(1);
 
-    int file_cnt = 0;
-    int len_sum = 0;
     int error_sum = 0;
     std::unordered_set<std::string> used_names;
 
@@ -451,8 +452,6 @@ static int extract(DecoderOptions& options)
         if (g_verbose)
             dec.VerboseLog(file.end_time, "---------------------------------------\n");
 
-        file_cnt++;
-        len_sum += file.len;
         error_sum += file.sync_errors + file.parity_errors;
     }
 

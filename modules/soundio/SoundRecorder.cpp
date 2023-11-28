@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <atomic>
+#include <utility>
 
 //----------------------------------------------------------------------------
 // SoundRecorderBackend

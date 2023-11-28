@@ -110,48 +110,43 @@ void TapeParser::PrintFlush()
     {
         const int N = sizeof(m_printbuf)/sizeof(m_printbuf[0]);
 
-        char buf[120];
-        char tmp[10];
-        buf[0] = 0;
-
-        // 6 wide column with section type or address in payload
+        // 5 wide column with section type or address in payload
+        char abuf[5+1];
         if (m_printbuf_payload)
-            sprintf(buf, "%04x  ", (int) m_printbuf_addr);
-        else if (m_printbuf_section == ST_HEADER)
-            strcat(buf, "Hdr   ");
-        else  if (m_printbuf_section == ST_NAME)
-            strcat(buf, "Name  ");
+            snprintf(abuf, sizeof(abuf), "%04x ", (int) m_printbuf_addr);
         else
-            strcat(buf, "Sync  ");
-
-        // Hex part, 3x16 = 48 chars
+            strcpy(abuf,
+                m_printbuf_section == ST_HEADER ? "Hdr  " :
+                m_printbuf_section == ST_NAME   ? "Name " :
+                                                  "Sync " );
+        // Hex part, 3x16 = 48 chars wide
+        char hbuf[3*N+1];
         for (int i=0; i<N; i++)
+        {
             if (i<m_printbuf_cnt)
             {
                 const auto& b = m_printbuf[i];
                 char c = b.sync_error   ? '!' :
                          b.parity_error ? '?' :
                          ' ';
-                sprintf(tmp, "%02x%c", b.byte, c);
-                strcat(buf,tmp);
+                snprintf(hbuf+3*i, 3+1, "%02x%c", b.byte, c);
             }
             else
-                strcat(buf,"   ");
+                strcpy(hbuf+3*i, "   ");
+        }
 
-        // Text part, 3+2x16 = 34 chars
-        strcat(buf," |");
+        // Text part, 16 chars wide
+        char tbuf[N+1];
         for (int i=0; i<N; i++)
         {
             char c = i<m_printbuf_cnt ? m_printbuf[i].byte : ' ';
             if (!isprint(c))
                 c = '.';
-            tmp[0] = c;
-            tmp[1] = 0;
-            strcat(buf, tmp);
+            tbuf[i] = c;
         }
-        strcat(buf,"|\n");
+        tbuf[N] = 0;
 
-        VerboseLog(m_printbuf[0].time, "%s", buf);
+        VerboseLog(m_printbuf[0].time, "%s %s |%s|\n", abuf, hbuf, tbuf);
 
         m_printbuf_cnt = 0;
     }
