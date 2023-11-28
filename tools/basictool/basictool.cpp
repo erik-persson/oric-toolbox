@@ -2,7 +2,7 @@
 //
 //  Oric BASIC utility
 //
-//  Copyright (c) 2022 Erik Persson
+//  Copyright (c) 2022-2023 Erik Persson
 //
 //----------------------------------------------------------------------------
 
@@ -11,7 +11,7 @@
 #include <tapeio/TapeFile.h>
 #include <tapeio/TapeDecoder.h>
 
-#define VERSION "1.0"
+#define VERSION "1.0.3"
 
 //----------------------------------------------------------------------------
 // Keywords

@@ -28,7 +28,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-#define VERSION "1.0.2"
+#define VERSION "1.0.3"
 
 //----------------------------------------------------------------------------
 // Command line options
