@@ -44,6 +44,9 @@ endif
 CFLAGS += -Wno-strict-overflow
 CPPFLAGS += -Wno-strict-overflow
 
+# Apple clang 17 warns about variable length arrays being a Clang extension
+CPPFLAGS += -Wno-vla-cxx-extension
+
 .PHONY: depend
 depend out/depend.mak: Makefile $(PREDEPS)
 	@echo "Checking dependencies"

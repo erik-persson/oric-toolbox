@@ -51,9 +51,9 @@ Portability
 
 Platforms on which the software has run successfully include
 * openSUSE 15.4, x84_64
-* macOS Sonoma 14.1.1, AArch64
+* macOS Sequoia 15.4, AArch64
 * cygwin on Windows 10, x86_64
 
 Compilers that have been used with success include
 * gcc 7.5.0, 9.4.0, 11.3.0
-* Apple clang version 12.0.5, 15.0.0
+* Apple clang version 12.0.5, 15.0.0, 17.0.0
